@@ -527,7 +527,7 @@ while True:
                 # TRACKING SERVO53
                 # MODEL TALI KARET
                 # =====================================
-                error_left_y = left_cy - center_y
+                error_left_y = smooth_left_y - center_y
 
                 servo53 = int(
                     -44 + (error_left_y * 0.25)
