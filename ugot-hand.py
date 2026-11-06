@@ -4,7 +4,6 @@ import mediapipe as mp
 import time
 import math
 import threading
-import queue
 
 # pip install ugot opencv-python mediapipe protobuf==3.20.3
 # =====================================
@@ -294,43 +293,43 @@ while True:
             iy = int(index_tip.y * h)
 
             # =====================================
-            # JARAK CUBIT (RAW, DALAM PIXEL)
-            # =====================================
-            pinch_distance = math.hypot(
-                tx - ix,
-                ty - iy
-            )
-
-            # =====================================
-            # UKURAN TANGAN (REFERENSI SKALA)
-            # pakai jarak wrist(0) -> pangkal jari tengah(9)
-            # supaya tidak berubah walau jari dibuka/ditutup
-            # =====================================
-            wrist = handLms.landmark[0]
-            middle_mcp = handLms.landmark[9]
-
-            wx, wy = wrist.x * w, wrist.y * h
-            mx, my = middle_mcp.x * w, middle_mcp.y * h
-
-            hand_size = math.hypot(mx - wx, my - wy)
-
-            # jaga-jaga supaya tidak dibagi nol
-            if hand_size < 1:
-                hand_size = 1
-
-            # =====================================
-            # PINCH RATIO (SUDAH TERNORMALISASI)
-            # tidak lagi tergantung jarak tangan ke kamera
-            # =====================================
-            raw_pinch_ratio = pinch_distance / hand_size
-
-            # =====================================
             # TANGAN KANAN
             # GERAKKAN SERVO 51 & 52
             # =====================================
             if label == "Right":
 
                 right_hand_detected = True
+
+                # =====================================
+                # JARAK CUBIT (RAW, DALAM PIXEL)
+                # =====================================
+                pinch_distance = math.hypot(
+                    tx - ix,
+                    ty - iy
+                )
+
+                # =====================================
+                # UKURAN TANGAN (REFERENSI SKALA)
+                # pakai jarak wrist(0) -> pangkal jari tengah(9)
+                # supaya tidak berubah walau jari dibuka/ditutup
+                # =====================================
+                wrist = handLms.landmark[0]
+                middle_mcp = handLms.landmark[9]
+
+                wx, wy = wrist.x * w, wrist.y * h
+                mx, my = middle_mcp.x * w, middle_mcp.y * h
+
+                hand_size = math.hypot(mx - wx, my - wy)
+
+                # jaga-jaga supaya tidak dibagi nol
+                if hand_size < 1:
+                    hand_size = 1
+
+                # =====================================
+                # PINCH RATIO (SUDAH TERNORMALISASI)
+                # tidak lagi tergantung jarak tangan ke kamera
+                # =====================================
+                raw_pinch_ratio = pinch_distance / hand_size
 
                 # smooth pinch ratio (redam jitter)
                 # gunakan round bukan int() agar tidak truncate ke bawah
