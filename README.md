@@ -18,7 +18,7 @@ Proyek ini menggabungkan **Mediapipe** (deteksi tangan), **OpenCV** (pengolahan 
 ## 📦 Dependencies
 
 ```bash
-pip install ugot opencv-python mediapipe protobuf==3.20.3
+pip install -r requirements.txt
 ```
 
 ## ⚙️ Konfigurasi
