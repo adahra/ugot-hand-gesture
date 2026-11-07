@@ -4,6 +4,7 @@ import mediapipe as mp
 import time
 import math
 import threading
+import atexit
 
 # pip install ugot opencv-python mediapipe protobuf==3.20.3
 # =====================================
@@ -20,9 +21,13 @@ SERVO_EXTRA_ID = 53  # tangan kiri (dulu 53)
 # =====================================
 got = ugot.UGOT()
 
-got.initialize('192.168.1.2')
+try:
+    got.initialize('192.168.1.2')
+except Exception as e:
+    print(f"❌ Gagal inisialisasi robot: {e}")
+    exit(1)
 
-got.open_camera()
+# ponytail: got.open_camera() tidak dipanggil; kamera display pakai webcam laptop.
 
 print("📷 Kamera laptop digunakan")
 
@@ -32,8 +37,7 @@ print("📷 Kamera laptop digunakan")
 print("🔄 restore arm")
 
 # got.mechanical_arms_restory()
-
-time.sleep(3)
+# (fitur dinonaktifkan — tidak ada yang dijalankan)
 
 # =====================================
 # POSISI AWAL SERVO
@@ -158,7 +162,7 @@ def robot_worker():
                 except Exception as e:
                     print(f"⚠️ gagal kirim servo {servo_id}: {e}")
 
-        time.sleep(SERVO_SEND_INTERVAL)
+        stop_event.wait(SERVO_SEND_INTERVAL)
 
 
 robot_thread = threading.Thread(target=robot_worker, daemon=True)
@@ -172,6 +176,7 @@ smooth_y = 240
 
 alpha = 0.7
 
+smooth_left_x = 320
 smooth_left_y = 240
 left_alpha = 0.7
 
@@ -218,7 +223,8 @@ while True:
     # mirror natural
     img = cv2.flip(img, 1)
 
-    img = cv2.resize(img, (640, 480))
+    if img.shape[1] != 640 or img.shape[0] != 480:
+        img = cv2.resize(img, (640, 480))
 
     rgb = cv2.cvtColor(
         img,
@@ -228,7 +234,9 @@ while True:
     # =====================================
     # DETEKSI TANGAN
     # =====================================
+    rgb.flags.writeable = False
     results = hands.process(rgb)
+    rgb.flags.writeable = True
 
     h, w = img.shape[:2]
 
@@ -249,6 +257,7 @@ while True:
     # kalau di frame ini tidak ada tangan kanan sama sekali,
     # jangan biarkan counter nyangkut dari frame sebelumnya
     right_hand_detected = False
+    left_hand_detected = False
 
     # =====================================
     # ADA TANGAN
@@ -296,7 +305,7 @@ while True:
             # TANGAN KANAN
             # GERAKKAN SERVO 51 & 52
             # =====================================
-            if label == "Right":
+            if label == "Right" and not right_hand_detected:
 
                 right_hand_detected = True
 
@@ -395,7 +404,8 @@ while True:
                 # =====================================
                 if abs(error_x) > 10:
 
-                    servo51 += int(error_x * 0.04)
+                    # ponytail: step integer linier, ganti PID controller jika butuh respon kurva halus
+                    servo51 += int(error_x * 0.04) or (1 if error_x > 0 else -1)
 
                     servo51 = max(
                         SERVO51_MIN,
@@ -416,7 +426,8 @@ while True:
                 # =====================================
                 if abs(error_y) > 10:
 
-                    servo52 += int(error_y * 0.04)
+                    # ponytail: step integer linier, ganti PID controller jika butuh respon kurva halus
+                    servo52 += int(error_y * 0.04) or (1 if error_y > 0 else -1)
 
                     servo52 = max(
                         SERVO52_MIN,
@@ -480,13 +491,19 @@ while True:
             # TANGAN KIRI
             # CONTROL SERVO 53
             # =====================================
-            elif label == "Left":
+            elif label == "Left" and not left_hand_detected:
+
+                left_hand_detected = True
 
                 # titik tangan kiri
                 left_cx = int((tx + ix) / 2)
                 left_cy = int((ty + iy) / 2)
 
                 # smooth posisi tangan kiri (EMA, sama seperti servo51/52)
+                smooth_left_x = int(
+                    left_alpha * left_cx +
+                    (1 - left_alpha) * smooth_left_x
+                )
                 smooth_left_y = int(
                     left_alpha * left_cy +
                     (1 - left_alpha) * smooth_left_y
@@ -497,7 +514,7 @@ while True:
                 # =====================================
                 cv2.circle(
                     img,
-                    (left_cx, left_cy),
+                    (smooth_left_x, smooth_left_y),
                     14,
                     (255, 0, 0),
                     -1
@@ -506,7 +523,7 @@ while True:
                 cv2.putText(
                     img,
                     "SERVO53",
-                    (left_cx - 35, left_cy - 20),
+                    (smooth_left_x - 35, smooth_left_y - 20),
                     cv2.FONT_HERSHEY_SIMPLEX,
                     0.5,
                     (255, 0, 0),
@@ -517,7 +534,7 @@ while True:
                 cv2.line(
                     img,
                     (center_x, center_y),
-                    (left_cx, left_cy),
+                    (smooth_left_x, smooth_left_y),
                     (255, 0, 0),
                     2
                 )
@@ -608,13 +625,19 @@ while True:
 # =====================================
 # CLEANUP
 # =====================================
-stop_event.set()
-robot_thread.join(timeout=1)
+_cleaned_up = False
 
-cap.release()
+def cleanup():
+    global _cleaned_up
+    if _cleaned_up:
+        return
+    _cleaned_up = True
+    stop_event.set()
+    robot_thread.join(timeout=1)
+    if cap.isOpened():
+        cap.release()
+    cv2.destroyAllWindows()
+    print("Program selesai")
 
-cv2.destroyAllWindows()
-
-got.close_camera()
-
-print("Program selesai")
+atexit.register(cleanup)
+cleanup()
