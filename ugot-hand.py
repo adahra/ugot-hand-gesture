@@ -656,7 +656,10 @@ cleanup()
 # ✅ Warna teks status berwarna sesuai state (implemented)
 # ✅ Implementasi warna status berdasarkan state tangan berhasil diintegrasikan
 # TODO: Visual feedback - bar visual rasio cubit dengan warna sesuai kondisi (close/open/neutral)
-# TODO: Konfigurasi dinamis - pintasan keyboard ([] [o:p) untuk menyesuaikan PINCH_CLOSE_RATIO dan PINCH_OPEN_RATIO secara real-time tanpa perlu edit kode
+#   * Catatan: Implementasi bar visual sebelumnya mengalami kendala indentasi;
+#     akan diimplementasikan dengan pendekatan berbeda di versi mendatang
+# TODO: Konfigurasi dinamis - pintasan keyboard ([] [o:p) untuk menyesuaikan
+#   PINCH_CLOSE_RATIO dan PINCH_OPEN_RATIO secara real-time tanpa perlu edit kode
 # TODO: Implementasikan PID controller untuk gerakan servo yang lebih halus dan responsif
 # TODO: Tambahkan dukungan multi-robot dengan alamat IP yang dapat dipilih di runtime
 # TODO: Buat konfigurasi file (JSON/YAML) untuk menyimpan semua parameter threshold dan gain
