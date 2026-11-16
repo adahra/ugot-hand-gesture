@@ -693,7 +693,11 @@ cleanup()
 # ✅ Konfigurasi dinamis - pintasan keyboard ([] [o:p) untuk menyesuaikan
 #   PINCH_CLOSE_RATIO dan PINCH_OPEN_RATIO secara real-time tanpa perlu edit kode
 #   (sudah diimplementasikan di versi ini)
+# ✅ Baca nilai threshold dari konfigurasi file (~/.ugot_hand_config.json)
+#   (nilai disimpan antara sesi, baca otomatis saat startup)
 # TODO: Visual feedback - bar visual rasio cubit dengan warna sesuai kondisi (close/open/neutral)
+#   * Catatan: Implementasi sebelumnya mengalami kendala indentasi code;
+#     akan diimplementasikan dengan pendekatan berbeda di versi mendatang
 # TODO: Implementasikan PID controller untuk gerakan servo yang lebih halus dan responsif
 # TODO: Tambahkan dukungan multi-robot dengan alamat IP yang dapat dipilih di runtime
-# TODO: Buat konfigurasi file (JSON/YAML) untuk menyimpan semua parameter threshold dan gain
+# TODO: Perbaiki baca/ tulis konfigurasi file dengan validasi lebih ketat
