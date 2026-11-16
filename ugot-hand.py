@@ -568,13 +568,21 @@ while True:
     # =====================================
     # INFO
     # =====================================
+    # Warna teks status berwarna sesuai state
+    if text == "TUTUP CAPIT":
+        text_color = (0, 0, 255)  # merah = tutup capit
+    elif text == "BUKA CAPIT":
+        text_color = (0, 255, 255)  # kuning = buka kapit
+    else:
+        text_color = (0, 255, 0)  # hijau = normal
+
     cv2.putText(
         img,
         text,
         (10, 30),
         cv2.FONT_HERSHEY_SIMPLEX,
         0.8,
-        (0, 255, 0),
+        text_color,
         2
     )
 
@@ -641,3 +649,14 @@ def cleanup():
 
 atexit.register(cleanup)
 cleanup()
+
+# =====================================
+# TODO: Improvements for future versions
+# =====================================
+# ✅ Warna teks status berwarna sesuai state (implemented)
+# ✅ Implementasi warna status berdasarkan state tangan berhasil diintegrasikan
+# TODO: Visual feedback - bar visual rasio cubit dengan warna sesuai kondisi (close/open/neutral)
+# TODO: Konfigurasi dinamis - pintasan keyboard ([] [o:p) untuk menyesuaikan PINCH_CLOSE_RATIO dan PINCH_OPEN_RATIO secara real-time tanpa perlu edit kode
+# TODO: Implementasikan PID controller untuk gerakan servo yang lebih halus dan responsif
+# TODO: Tambahkan dukungan multi-robot dengan alamat IP yang dapat dipilih di runtime
+# TODO: Buat konfigurasi file (JSON/YAML) untuk menyimpan semua parameter threshold dan gain
