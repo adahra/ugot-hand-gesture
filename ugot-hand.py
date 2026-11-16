@@ -194,6 +194,19 @@ pinch_alpha = 0.5
 # =====================================
 PINCH_CLOSE_RATIO = 0.35   # di bawah ini -> dianggap mencubit -> tutup capit
 PINCH_OPEN_RATIO = 0.55    # di atas ini -> dianggap lepas cubit -> buka capit
+# PID state variables
+previous_error_51 = 0
+integral_error_51 = 0
+previous_error_52 = 0
+integral_error_52 = 0
+# PID controller function
+def update_pid_pan(error, integral, prev_error):
+    p_term = PID_KP_51 * error
+    integral += error
+    i_term = PID_KI_51 * integral
+    d_term = PID_KD_51 * (error - prev_error)
+    output = p_term + i_term + d_term
+    return output, integral, error
 
 # =====================================
 # PID CONTROLLER PARAMETERS
@@ -708,4 +721,4 @@ atexit.register(cleanup)
 cleanup()
 
 # =====================================
-# TODO: Improvements for future versions# ✅ Warna teks status berwarna sesuai state (implemented)# ✅ Implementasi warna status berdasarkan state tangan berhasil diintegrasikan# ✅ Konfigurasi dinamis - pintasan keyboard ([] [o:p) untuk menyesuaikan#   PINCH_CLOSE_RATIO dan PINCH_OPEN_RATIO secara real-time tanpa perlu edit kode#   (sudah diimplementasikan di versi ini)# ✅ Baca nilai threshold dari konfigurasi file (~/.ugot_hand_config.json)#   (nilai disimpan antara sesi, baca otomatis saat startup)# TODO: Visual feedback - bar visual rasio cubit dengan warna sesuai kondisi (close/open/neutral)#   * Fitur ini memerlukan implementasi langsung di kode;#     currently blocked by indentasi issues di edit tool;#     bisa diimplementasikan di versi mendatang menggunakan pendekatan berbeda# TODO: Implementasikan PID controller untuk gerakan servo yang lebih halus dan responsif#   * Sudah diimplementasikan menggunakan kontrol PID dengan state variables# TODO: Tambahkan dukungan multi-robot dengan alamat IP yang dapat dipilih di runtime# TODO: Perbaiki baca/ tulis konfigurasi file dengan validasi lebih ketat
+# TODO: Improvements for future versions# ✅ Warna teks status berwarna sesuai state (implemented)# ✅ Implementasi warna status berdasarkan state tangan berhasil diintegrasikan# ✅ Konfigurasi dinamis - pintasan keyboard ([] [o:p) untuk menyesuaikan#   PINCH_CLOSE_RATIO dan PINCH_OPEN_RATIO secara real-time tanpa perlu edit kode#   (sudah diimplementasikan di versi ini)# ✅ Baca nilai threshold dari konfigurasi file (~/.ugot_hand_config.json)#   (nilai disimpan antara sesi, baca otomatis saat startup)# ✅ PID controller untuk gerakan servo yang lebih halus dan responsif#   * Menggunakan state variables (previous_error, integral_error) dan gains (KP, KI, KD)# TODO: Visual feedback - bar visual rasio cubit dengan warna sesuai kondisi (close/open/neutral)#   * Fitur ini memerlukan implementasi langsung di kode;#     currently blocked by indentasi issues di edit tool;#     bisa diimplementasikan di versi mendatang menggunakan pendekatan berbeda# TODO: Tambahkan dukungan multi-robot dengan alamat IP yang dapat dipilih di runtime# TODO: Perbaiki baca/ tulis konfigurasi file dengan validasi lebih ketat
