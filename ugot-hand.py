@@ -624,8 +624,43 @@ while True:
         img
     )
 
+    # Tampilkan konfigurasi dinamis yang sedang aktif
+    cv2.putText(
+        img,
+        f"CloseR:{PINCH_CLOSE_RATIO:.2f} OpenR:{PINCH_OPEN_RATIO:.2f}",
+        (10, 240),
+        cv2.FONT_HERSHEY_SIMPLEX,
+        0.5,
+        (255, 255, 255),
+        1
+    )
+    cv2.putText(
+        img,
+        "[:] Close- [] Open  o:p Adjust",
+        (10, 260),
+        cv2.FONT_HERSHEY_SIMPLEX,
+        0.5,
+        (255, 255, 0),
+        1
+    )
+
     # ESC keluar
-    key = cv2.waitKey(1)
+    key = cv2.waitKey(1) & 0xFF
+
+    # Dynamic configuration - keyboard shortcuts untuk adjust threshold
+    # Adjust pinch ratios in real-time (tanpa edit kode)
+    if key == ord('[') and smooth_pinch_ratio > PINCH_CLOSE_RATIO:
+        PINCH_CLOSE_RATIO = max(0.05, PINCH_CLOSE_RATIO - 0.01)
+        print(f"⚙️ PINCH_CLOSE_RATIO diubah menjadi: {PINCH_CLOSE_RATIO:.2f}")
+    elif key == ord(']') and smooth_pinch_ratio < PINCH_OPEN_RATIO:
+        PINCH_CLOSE_RATIO = min(PINCH_OPEN_RATIO - 0.05, PINCH_CLOSE_RATIO + 0.01)
+        print(f"⚙️ PINCH_CLOSE_RATIO diubah menjadi: {PINCH_CLOSE_RATIO:.2f}")
+    elif key == ord('o') and smooth_pinch_ratio > PINCH_CLOSE_RATIO:
+        PINCH_OPEN_RATIO = max(PINCH_CLOSE_RATIO + 0.05, PINCH_OPEN_RATIO - 0.01)
+        print(f"⚙️ PINCH_OPEN_RATIO diubah menjadi: {PINCH_OPEN_RATIO:.2f}")
+    elif key == ord('p') and smooth_pinch_ratio < PINCH_OPEN_RATIO:
+        PINCH_OPEN_RATIO = min(1.0, PINCH_OPEN_RATIO + 0.01)
+        print(f"⚙️ PINCH_OPEN_RATIO diubah menjadi: {PINCH_OPEN_RATIO:.2f}")
 
     if key == 27:
         break
@@ -655,11 +690,10 @@ cleanup()
 # =====================================
 # ✅ Warna teks status berwarna sesuai state (implemented)
 # ✅ Implementasi warna status berdasarkan state tangan berhasil diintegrasikan
-# TODO: Visual feedback - bar visual rasio cubit dengan warna sesuai kondisi (close/open/neutral)
-#   * Catatan: Implementasi bar visual sebelumnya mengalami kendala indentasi;
-#     akan diimplementasikan dengan pendekatan berbeda di versi mendatang
-# TODO: Konfigurasi dinamis - pintasan keyboard ([] [o:p) untuk menyesuaikan
+# ✅ Konfigurasi dinamis - pintasan keyboard ([] [o:p) untuk menyesuaikan
 #   PINCH_CLOSE_RATIO dan PINCH_OPEN_RATIO secara real-time tanpa perlu edit kode
+#   (sudah diimplementasikan di versi ini)
+# TODO: Visual feedback - bar visual rasio cubit dengan warna sesuai kondisi (close/open/neutral)
 # TODO: Implementasikan PID controller untuk gerakan servo yang lebih halus dan responsif
 # TODO: Tambahkan dukungan multi-robot dengan alamat IP yang dapat dipilih di runtime
 # TODO: Buat konfigurasi file (JSON/YAML) untuk menyimpan semua parameter threshold dan gain
