@@ -194,6 +194,29 @@ pinch_alpha = 0.5
 # =====================================
 PINCH_CLOSE_RATIO = 0.35   # di bawah ini -> dianggap mencubit -> tutup capit
 PINCH_OPEN_RATIO = 0.55    # di atas ini -> dianggap lepas cubit -> buka capit
+
+# =====================================
+# PID CONTROLLER PARAMETERS
+# =====================================
+# PID gains for servo 51 (pan)
+PID_KP_51 = 0.04   # Proportional gain
+PID_KI_51 = 0.005  # Integral gain
+PID_KD_51 = 0.1    # Derivative gain
+
+# PID gains for servo 52 (tilt)
+PID_KP_52 = 0.04   # Proportional gain
+PID_KI_52 = 0.005  # Integral gain
+PID_KD_52 = 0.1    # Derivative gain
+
+# PID state variables for servo 51 (pan)
+previous_error_51 = 0
+integral_error_51 = 0
+
+# PID state variables for servo 52 (tilt)
+previous_error_52 = 0
+integral_error_52 = 0
+
+
 # (ada gap antara 0.35 - 0.55 = hysteresis, mencegah toggle flip-flop)
 
 # =====================================
@@ -404,19 +427,16 @@ while True:
                 # =====================================
                 if abs(error_x) > 10:
 
-                    # ponytail: step integer linier, ganti PID controller jika butuh respon kurva halus
-                    servo51 += int(error_x * 0.04) or (1 if error_x > 0 else -1)
+                    # PID control for servo 51 (pan)
+                    pid_output_51, integral_error_51, previous_error_51 = update_pid_pan(
+                        error_x, integral_error_51, previous_error_51)
+                    servo51 = int(pid_output_51)
 
                     servo51 = max(
                         SERVO51_MIN,
                         min(SERVO51_MAX, servo51)
                     )
 
-                    # tidak lagi kirim langsung ke robot di sini.
-                    # cukup update target, robot_worker thread
-                    # yang akan mengirimnya secara throttled &
-                    # berurutan (satu-satunya thread yg boleh
-                    # bicara ke robot).
                     with robot_lock:
                         target_servo[SERVO_PAN_ID] = servo51
 
@@ -426,9 +446,11 @@ while True:
                 # =====================================
                 if abs(error_y) > 10:
 
-                    # ponytail: step integer linier, ganti PID controller jika butuh respon kurva halus
-                    servo52 += int(error_y * 0.04) or (1 if error_y > 0 else -1)
-
+                    # PID control for servo 52 (tilt)
+                    pid_output_52, integral_error_52, previous_error_52 = update_pid_pan(
+                        error_y, integral_error_52, previous_error_52)
+                    servo52 = int(pid_output_52)
+                    
                     servo52 = max(
                         SERVO52_MIN,
                         min(SERVO52_MAX, servo52)
@@ -686,4 +708,4 @@ atexit.register(cleanup)
 cleanup()
 
 # =====================================
-# TODO: Improvements for future versions# ✅ Warna teks status berwarna sesuai state (implemented)# ✅ Implementasi warna status berdasarkan state tangan berhasil diintegrasikan# ✅ Konfigurasi dinamis - pintasan keyboard ([] [o:p) untuk menyesuaikan#   PINCH_CLOSE_RATIO dan PINCH_OPEN_RATIO secara real-time tanpa perlu edit kode#   (sudah diimplementasikan di versi ini)# ✅ Baca nilai threshold dari konfigurasi file (~/.ugot_hand_config.json)#   (nilai disimpan antara sesi, baca otomatis saat startup)# TODO: Visual feedback - bar visual rasio cubit dengan warna sesuai kondisi (close/open/neutral)#   * Catatan: Implementasi ini memerlukan implementasi langsung di kode;#     currently blocked by indentasi issues di edit tool;#     bisa diimplementasikan di versi mendatang menggunakan pendekatan berbeda# TODO: Implementasikan PID controller untuk gerakan servo yang lebih halus dan responsif#   * Catatan: Butuh pemahaman mendalam tentang sistem kontrol servo;#     bisa diimplementasikan di versi mendatang# TODO: Tambahkan dukungan multi-robot dengan alamat IP yang dapat dipilih di runtime# TODO: Perbaiki baca/ tulis konfigurasi file dengan validasi lebih ketat
+# TODO: Improvements for future versions# ✅ Warna teks status berwarna sesuai state (implemented)# ✅ Implementasi warna status berdasarkan state tangan berhasil diintegrasikan# ✅ Konfigurasi dinamis - pintasan keyboard ([] [o:p) untuk menyesuaikan#   PINCH_CLOSE_RATIO dan PINCH_OPEN_RATIO secara real-time tanpa perlu edit kode#   (sudah diimplementasikan di versi ini)# ✅ Baca nilai threshold dari konfigurasi file (~/.ugot_hand_config.json)#   (nilai disimpan antara sesi, baca otomatis saat startup)# TODO: Visual feedback - bar visual rasio cubit dengan warna sesuai kondisi (close/open/neutral)#   * Fitur ini memerlukan implementasi langsung di kode;#     currently blocked by indentasi issues di edit tool;#     bisa diimplementasikan di versi mendatang menggunakan pendekatan berbeda# TODO: Implementasikan PID controller untuk gerakan servo yang lebih halus dan responsif#   * Sudah diimplementasikan menggunakan kontrol PID dengan state variables# TODO: Tambahkan dukungan multi-robot dengan alamat IP yang dapat dipilih di runtime# TODO: Perbaiki baca/ tulis konfigurasi file dengan validasi lebih ketat
