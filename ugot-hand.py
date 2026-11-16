@@ -696,8 +696,9 @@ cleanup()
 # ✅ Baca nilai threshold dari konfigurasi file (~/.ugot_hand_config.json)
 #   (nilai disimpan antara sesi, baca otomatis saat startup)
 # TODO: Visual feedback - bar visual rasio cubit dengan warna sesuai kondisi (close/open/neutral)
-#   * Catatan: Implementasi sebelumnya mengalami kendala indentasi code;
+#   * Catatan: Implementasi code mengalami kendala indentasi di edit tool;
 #     akan diimplementasikan dengan pendekatan berbeda di versi mendatang
 # TODO: Implementasikan PID controller untuk gerakan servo yang lebih halus dan responsif
 # TODO: Tambahkan dukungan multi-robot dengan alamat IP yang dapat dipilih di runtime
 # TODO: Perbaiki baca/ tulis konfigurasi file dengan validasi lebih ketat
+#   (fitur ini sudah sebagian terintegrasi melalui konfigurasi dinamis keyboard)
