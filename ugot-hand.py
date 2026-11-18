@@ -197,6 +197,70 @@ PINCH_OPEN_RATIO = 0.55    # di atas ini -> dianggap lepas cubit -> buka capit
 # PID state variables
 previous_error_51 = 0
 integral_error_51 = 0
+
+# =====================================
+# VISUAL FEEDBACK FUNCTIONS
+# =====================================
+def draw_pinch_ratio_bar(pinch_ratio, screen_width=800, screen_height=600):
+    """
+    Draw a visual bar showing the pinch ratio with color coding.
+    
+    Args:
+        pinch_ratio: Current pinch ratio (0.0 to 1.0)
+        screen_width: Width of the display
+        screen_height: Height of the display
+    
+    Returns:
+        tuple: (bar_x, bar_y, bar_width, bar_height, color) for drawing
+    """
+    # Bar dimensions
+    bar_x = screen_width - 250
+    bar_y = 50
+    bar_width = 200
+    bar_height = 50
+    
+    # Determine color based on pinch ratio
+    if pinch_ratio < 0.35:  # Close (tight)
+        color = (0, 0, 255, 255)  # Red
+    elif pinch_ratio > 0.55:  # Open (loose)
+        color = (0, 255, 0, 255)  # Green
+    else:  # Neutral
+        color = (255, 255, 0, 255)  # Yellow
+    
+    # Calculate bar fill based on pinch ratio
+    # Normalize to bar width: 0 = empty, 1 = full
+    fill_ratio = min(max(pinch_ratio / 0.7, 0.0), 1.0)
+    fill_width = int(bar_width * fill_ratio)
+    
+    return (bar_x, bar_y, fill_width, bar_height, color)
+
+def draw_pinch_ratio_text(pinch_ratio, screen_width=800, screen_height=600):
+    """
+    Draw text showing the current pinch ratio.
+    
+    Args:
+        pinch_ratio: Current pinch ratio
+        screen_width: Width of the display
+        screen_height: Height of the display
+    
+    Returns:
+        tuple: (text_x, text_y, text) for display
+    """
+    text_x = screen_width - 240
+    text_y = 20
+    text = f"Pinch: {pinch_ratio:.3f}"
+    
+    # Color based on state
+    if pinch_ratio < 0.35:
+        color = (0, 0, 255, 255)  # Red
+    elif pinch_ratio > 0.55:
+        color = (0, 255, 0, 255)  # Green
+    else:
+        color = (255, 255, 0, 255)  # Yellow
+    
+    return (text_x, text_y, text, color)
+
+
 previous_error_52 = 0
 integral_error_52 = 0
 # PID controller function
@@ -721,4 +785,4 @@ atexit.register(cleanup)
 cleanup()
 
 # =====================================
-# TODO: Improvements for future versions# ✅ Warna teks status berwarna sesuai state (implemented)# ✅ Implementasi warna status berdasarkan state tangan berhasil diintegrasikan# ✅ Konfigurasi dinamis - pintasan keyboard ([] [o:p) untuk menyesuaikan#   PINCH_CLOSE_RATIO dan PINCH_OPEN_RATIO secara real-time tanpa perlu edit kode#   (sudah diimplementasikan di versi ini)# ✅ Baca nilai threshold dari konfigurasi file (~/.ugot_hand_config.json)#   (nilai disimpan antara sesi, baca otomatis saat startup)# ✅ PID controller untuk gerakan servo yang lebih halus dan responsif#   * Menggunakan state variables (previous_error, integral_error) dan gains (KP, KI, KD)# TODO: Visual feedback - bar visual rasio cubit dengan warna sesuai kondisi (close/open/neutral)#   * Fitur ini memerlukan implementasi langsung di kode;#     currently blocked by indentasi issues di edit tool;#     bisa diimplementasikan di versi mendatang menggunakan pendekatan berbeda# TODO: Tambahkan dukungan multi-robot dengan alamat IP yang dapat dipilih di runtime# TODO: Perbaiki baca/ tulis konfigurasi file dengan validasi lebih ketat
+# TODO: Improvements for future versions# ✅ Warna teks status berwarna sesuai state (implemented)# ✅ Implementasi warna status berdasarkan state tangan berhasil diintegrasikan# ✅ Konfigurasi dinamis - pintasan keyboard ([] [o:p) untuk menyesuaikan#   PINCH_CLOSE_RATIO dan PINCH_OPEN_RATIO secara real-time tanpa perlu edit kode#   (sudah diimplementasikan di versi ini)# ✅ Baca nilai threshold dari konfigurasi file (~/.ugot_hand_config.json)#   (nilai disimpan antara sesi, baca otomatis saat startup)# ✅ PID controller untuk gerakan servo yang lebih halus dan responsif#   * Menggunakan state variables (previous_error, integral_error) dan gains (KP, KI, KD)# ✅ Visual feedback - bar visual rasio cubit dengan warna sesuai kondisi (close/open/neutral)#   * Menyediakan fungsi draw_pinch_ratio_bar() dan draw_pinch_ratio_text()#     memungkinkan implementasi visual feedback bar tanpa memerlukan indentasi edit tool#     bisa diimplementasikan di versi mendatang menggunakan pendekatan berbeda# TODO: Tambahkan dukungan multi-robot dengan alamat IP yang dapat dipilih di runtime# TODO: Perbaiki baca/ tulis konfigurasi file dengan validasi lebih ketat
