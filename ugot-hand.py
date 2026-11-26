@@ -264,11 +264,11 @@ def draw_pinch_ratio_text(pinch_ratio, screen_width=800, screen_height=600):
 previous_error_52 = 0
 integral_error_52 = 0
 # PID controller function
-def update_pid_pan(error, integral, prev_error):
-    p_term = PID_KP_51 * error
+def update_pid(error, kp, ki, kd, integral, prev_error, servo_id):
+    p_term = kp * error
     integral += error
-    i_term = PID_KI_51 * integral
-    d_term = PID_KD_51 * (error - prev_error)
+    i_term = ki * integral
+    d_term = kd * (error - prev_error)
     output = p_term + i_term + d_term
     return output, integral, error
 
@@ -284,14 +284,6 @@ PID_KD_51 = 0.1    # Derivative gain
 PID_KP_52 = 0.04   # Proportional gain
 PID_KI_52 = 0.005  # Integral gain
 PID_KD_52 = 0.1    # Derivative gain
-
-# PID state variables for servo 51 (pan)
-previous_error_51 = 0
-integral_error_51 = 0
-
-# PID state variables for servo 52 (tilt)
-previous_error_52 = 0
-integral_error_52 = 0
 
 
 # (ada gap antara 0.35 - 0.55 = hysteresis, mencegah toggle flip-flop)
@@ -322,6 +314,25 @@ while True:
 
     # mirror natural
     img = cv2.flip(img, 1)
+    """Summary of current architecture:
+    1. Single file ugot-hand.py (834 lines)
+    2. Thread-main: camera capture, hand detection, gesture recognition
+    3. Thread-worker: exclusive robot communication via robot_worker()
+    4. Thread-safety: robot_lock protects all shared state updates
+    5. PID controller: single update_pid() function with separate state vars for servo 51/52
+    6. Hand tracking: embedded in main loop (lines 413-481)
+    7. Visual feedback: draw_pinch_ratio_bar() and draw_pinch_ratio_text()
+    
+    TODO Status:
+    - COMPLETED: Unified PID controller with configurable gains
+    - COMPLETED: No duplicate PID implementations (already consolidated)
+    - PENDING: Consolidate PID state vars (51 vs 52 separate)
+    - PENDING: Extract hand tracking calculations
+    - PENDING: Improve main loop structure (duplicate preprocessing)
+    - PENDING: Optimize memory and performance
+    - PENDING: Add proper error recovery
+    - PENDING: Structure code for maintainability
+    """
 
     if img.shape[1] != 640 or img.shape[0] != 480:
         img = cv2.resize(img, (640, 480))
@@ -505,8 +516,9 @@ while True:
                 if abs(error_x) > 10:
 
                     # PID control for servo 51 (pan)
-                    pid_output_51, integral_error_51, previous_error_51 = update_pid_pan(
-                        error_x, integral_error_51, previous_error_51)
+                    pid_output_51, integral_error_51, previous_error_51 = update_pid(
+                        error_x, PID_KP_51, PID_KI_51, PID_KD_51,
+                        integral_error_51, previous_error_51, SERVO_PAN_ID)
                     servo51 = int(pid_output_51)
 
                     servo51 = max(
@@ -523,9 +535,9 @@ while True:
                 # =====================================
                 if abs(error_y) > 10:
 
-                    # PID control for servo 52 (tilt)
-                    pid_output_52, integral_error_52, previous_error_52 = update_pid_pan(
-                        error_y, integral_error_52, previous_error_52)
+                    pid_output_52, integral_error_52, previous_error_52 = update_pid(
+                        error_y, PID_KP_52, PID_KI_52, PID_KD_52,
+                        integral_error_52, previous_error_52, SERVO_TILT_ID)
                     servo52 = int(pid_output_52)
                     
                     servo52 = max(

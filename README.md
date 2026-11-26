@@ -87,7 +87,21 @@ README.md              # Dokumentasi (file ini)
 | `pinch_alpha` | 0.5 | Filter smoothing rasio cubit |
 | `PINCH_CLOSE_RATIO` | 0.35 | Di bawah ini = dianggap mencubit → tutup capit (bisa diubah real-time dengan `[]` dan `]`) |
 | `PINCH_OPEN_RATIO` | 0.55 | Di atas ini = dianggap lepas cubit → buka capit (bisa diubah real-time dengan `o` dan `p`) |
+| Parameter | Nilai | Keterangan |
+|-----------|-------|-----------|
+| `SERVO_SEND_INTERVAL` | 0.08s | Jeda minimum antar kirim command servo |
+| `alpha` | 0.7 | Filter smoothing posisi tangan |
+| `pinch_alpha` | 0.5 | Filter smoothing rasio cubit |
+| `PINCH_CLOSE_RATIO` | 0.35 | Di bawah ini = dianggap mencubit → tutup capit (bisa diubah real-time dengan `[]` dan `]`) |
+| `PINCH_OPEN_RATIO` | 0.55 | Di atas ini = dianggap lepas cubit → buka capit (bisa diubah real-time dengan `o` dan `p`) |
 | `PINCH_CONFIRM_FRAMES` | 4 | Frame yang dibutuhkan untuk konfirmasi |
+| `PID_KP` | 0.04 | Gain proporsional untuk servo 51 & 52 (pan/tilt) |
+| `PID_KI` | 0.005 | Gain integral untuk servo 51 & 52 (pan/tilt) |
+| `PID_KD` | 0.1 | Gain turunan untuk servo 51 & 52 (pan/tilt) |
+| `previous_error_51` | 0 | State variable untuk PID servo 51 |
+| `integral_error_51` | 0 | State variable untuk PID servo 51 |
+| `previous_error_52` | 0 | State variable untuk PID servo 52 |
+| `integral_error_52` | 0 | State variable untuk PID servo 52 |
 | `PID_KP_51` | 0.04 | Gain proporsional untuk servo 51 (pan) |
 | `PID_KI_51` | 0.005 | Gain integral untuk servo 51 (pan) |
 | `PID_KD_51` | 0.1 | Gain turunan untuk servo 51 (pan) |
